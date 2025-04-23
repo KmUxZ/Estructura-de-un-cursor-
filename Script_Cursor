@@ -1,0 +1,38 @@
+-- Cursor Base datos de GAIT
+
+DELIMITER //
+
+CREATE PROCEDURE listarEmpleadosConDistribuidor()
+BEGIN
+   
+    DECLARE done INT DEFAULT 0;
+    DECLARE emp_nombre VARCHAR(100);
+    DECLARE dist_nombre VARCHAR(100);
+
+    -- Recorrer los empleados y sus distribuidores
+    DECLARE cursor_emp CURSOR FOR
+        SELECT CONCAT(e.name, ' ', e.lastname), d.name
+        FROM employees e
+        JOIN distributors d ON e.id_distributor = d.id;
+
+    -- Handler fin del cursor
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+
+    OPEN cursor_emp;
+
+    emp_loop: LOOP
+        FETCH cursor_emp INTO emp_nombre, dist_nombre;
+
+        IF done THEN
+            LEAVE emp_loop;
+        END IF;
+
+        SELECT CONCAT('Empleado: ', emp_nombre, ' - Distribuidor: ', dist_nombre) AS info;
+    END LOOP;
+
+    CLOSE cursor_emp;
+END //
+
+DELIMITER ;
+
+CALL listarEmpleadosConDistribuidor();
